@@ -7,7 +7,7 @@ pipeline {
                 echo 'Running unit tests for the backend...'
                 // Add your backend unit test commands here
                 dir('bugtracker-backend') {
-                    go test ./... -v
+                    sh go test ./... -v
                 }
             }
         }
