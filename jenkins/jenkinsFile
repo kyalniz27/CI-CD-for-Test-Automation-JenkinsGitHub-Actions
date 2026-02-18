@@ -3,6 +3,12 @@ pipeline {
 
     stages {
         stage('Unit Tests - Backend') {
+            agent {
+                docker {
+                    image 'snakee/golang-junit:1.21'
+                    reuseNode true
+                }
+            }
             steps {
                 echo 'Running unit tests for the backend...'
                 // Add your backend unit test commands here
