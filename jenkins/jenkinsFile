@@ -15,16 +15,15 @@ pipeline {
             }
             steps {
                 echo 'Running unit tests for the backend...'
-                // Add your backend unit test commands here
                 dir('bugtracker-backend') {
                     sh 'go test ./... -v 2>&1 | go-junit-report > test-results.xml'
                 }
-
-                post{
-                    always {
-                        echo 'Collecting test results...'
-                        junit 'bugtracker-backend/test-results.xml'
-                    }
+            }
+            post {
+                always {
+                    echo 'Collecting test results...'
+                    junit 'bugtracker-backend/test-results.xml'
+                }
             }
         }
 
@@ -40,20 +39,17 @@ pipeline {
             }
             steps {
                 echo 'Running unit tests for the frontend...'
-                // Add your frontend unit test commands here
                 dir('bugtracker-frontend') {
                     sh 'npm install'
                     sh 'npm test'
                 }
             }
-
             post {
                 always {
                     echo 'Collecting test results...'
                     junit 'bugtracker-frontend/test-results.xml'
                 }
-
             }
+        }
     }
-}
 }
