@@ -40,6 +40,14 @@ pipeline {
                     sh 'npm test'
                 }
             }
+
+            post {
+                always {
+                    echo 'Collecting test results...'
+                    junit 'bugtracker-frontend/test-results.xml'
+                }
+
+            }
     }
 }
 }
