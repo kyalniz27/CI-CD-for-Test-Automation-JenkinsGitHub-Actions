@@ -9,6 +9,10 @@ pipeline {
                     reuseNode true
                 }
             }
+            environment {
+                GOCACHE = "${WORKSPACE}/.gocache"
+                GOPATH = "${WORKSPACE}/go"
+            }
             steps {
                 echo 'Running unit tests for the backend...'
                 // Add your backend unit test commands here
