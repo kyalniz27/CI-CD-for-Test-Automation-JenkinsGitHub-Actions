@@ -21,5 +21,24 @@ pipeline {
                 }
             }
         }
+
+        stage('Unit Tests - Frontend') {
+            agent {
+                docker {
+                    image 'node:18'
+                    reuseNode true
+                }
+            }
+            environment {
+                NODE_ENV = 'test'
+            }
+            steps {
+                echo 'Running unit tests for the frontend...'
+                // Add your frontend unit test commands here
+                dir('bugtracker-frontend') {
+                    sh 'npm install'
+                    sh 'npm test'
+                }
+            }
     }
 }
