@@ -1,6 +1,12 @@
 pipeline {
     agent any
 
+    environment {
+        DOCKER_HOST = 'tcp://docker:2376'
+        DOCKER_CERT_PATH = '/certs/client'
+        DOCKER_TLS_VERIFY = '1'
+    }
+
     stages {
 
         stage('Execute Unit Tests'){
@@ -10,6 +16,7 @@ pipeline {
                         docker {
                             image 'snakee/golang-junit:1.21'
                             reuseNode true
+                            args '--network jenkins -v jenkins-docker-certs:/certs/client:ro -e DOCKER_HOST=tcp://docker:2376 -e DOCKER_CERT_PATH=/certs/client -e DOCKER_TLS_VERIFY=1'
                         }
                     }
                     environment {
@@ -35,6 +42,7 @@ pipeline {
                         docker {
                             image 'node:18'
                             reuseNode true
+                            args '--network jenkins -v jenkins-docker-certs:/certs/client:ro -e DOCKER_HOST=tcp://docker:2376 -e DOCKER_CERT_PATH=/certs/client -e DOCKER_TLS_VERIFY=1'
                         }
                     }
                     environment {
@@ -62,11 +70,16 @@ pipeline {
                 docker {
                     image 'docker:27.5.1'
                     reuseNode true
-                    args '-v /var/run/docker.sock:/var/run/docker.sock -u 0'
+                    args '--network jenkins -v jenkins-docker-certs:/certs/client:ro -e DOCKER_HOST=tcp://docker:2376 -e DOCKER_CERT_PATH=/certs/client -e DOCKER_TLS_VERIFY=1'
                 }
             }
             steps{
+                echo 'Testing Docker connectivity...'
+                sh 'docker version'
+                echo 'Launching the application...'
                 sh 'docker compose up --build -d'
+                echo 'Checking running containers...'
+                sh 'docker ps'
             }
         }
     }
