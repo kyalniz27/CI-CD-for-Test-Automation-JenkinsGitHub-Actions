@@ -5,24 +5,41 @@ pipeline {
         DOCKER_HOST = 'tcp://docker:2376'
         DOCKER_CERT_PATH = '/certs/client'
         DOCKER_TLS_VERIFY = '1'
+        GOCACHE = "${WORKSPACE}/.gocache"
+        GOPATH = "${WORKSPACE}/go"
+        NODE_ENV = 'test'
     }
 
     stages {
 
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_HOST = 'tcp://docker:2376'
+        DOCKER_CERT_PATH = '/certs/client'
+        DOCKER_TLS_VERIFY = '1'
+        GOCACHE = "${WORKSPACE}/.gocache"
+        GOPATH = "${WORKSPACE}/go"
+        NODE_ENV = 'test'
+        PATH = "/usr/local/go/bin:${env.PATH}"
+    }
+
+    stages {
+
+        stage('Verify Tools') {
+            steps {
+                echo 'Verifying installed tools...'
+                sh 'go version'
+                sh 'node --version'
+                sh 'npm --version'
+                sh 'which go-junit-report'
+            }
+        }
+
         stage('Execute Unit Tests'){
             parallel {
                 stage('Backend Unit Tests') {
-                    agent {
-                        docker {
-                            image 'snakee/golang-junit:1.21'
-                            reuseNode true
-                            args '--network jenkins -v jenkins-docker-certs:/certs/client:ro -e DOCKER_HOST=tcp://docker:2376 -e DOCKER_CERT_PATH=/certs/client -e DOCKER_TLS_VERIFY=1'
-                        }
-                    }
-                    environment {
-                        GOCACHE = "${WORKSPACE}/.gocache"
-                        GOPATH = "${WORKSPACE}/go"
-                    }
                     steps {
                         echo 'Running unit tests for the backend...'
                         dir('bugtracker-backend') {
@@ -38,16 +55,6 @@ pipeline {
                 }
 
                 stage('Frontend Unit Tests') {
-                    agent {
-                        docker {
-                            image 'node:18'
-                            reuseNode true
-                            args '--network jenkins -v jenkins-docker-certs:/certs/client:ro -e DOCKER_HOST=tcp://docker:2376 -e DOCKER_CERT_PATH=/certs/client -e DOCKER_TLS_VERIFY=1'
-                        }
-                    }
-                    environment {
-                        NODE_ENV = 'test'
-                    }
                     steps {
                         echo 'Running unit tests for the frontend...'
                         dir('bugtracker-frontend') {
