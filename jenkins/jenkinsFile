@@ -8,7 +8,7 @@ pipeline {
         GOCACHE = "${WORKSPACE}/.gocache"
         GOPATH = "${WORKSPACE}/go"
         NODE_ENV = 'test'
-        PATH = "/usr/local/go/bin:${env.PATH}"
+        PATH = "/usr/local/go/bin:${WORKSPACE}/go/bin:${env.PATH}"
     }
 
     stages {
@@ -19,7 +19,12 @@ pipeline {
                 sh 'go version'
                 sh 'node --version'
                 sh 'npm --version'
-                sh 'which go-junit-report'
+                sh '''
+                    echo "GOPATH: $GOPATH"
+                    echo "PATH: $PATH" 
+                    ls -la $GOPATH/bin/ || echo "GOPATH/bin directory not found"
+                    find /var/jenkins_home -name "go-junit-report" -type f 2>/dev/null || echo "go-junit-report not found, will install"
+                '''
             }
         }
 
@@ -29,7 +34,19 @@ pipeline {
                     steps {
                         echo 'Running unit tests for the backend...'
                         dir('bugtracker-backend') {
-                            sh 'go test ./... -v 2>&1 | go-junit-report > test-results.xml'
+                            sh '''
+                                # Ensure go-junit-report is available
+                                export PATH=$PATH:$GOPATH/bin
+                                if ! command -v go-junit-report >/dev/null 2>&1; then
+                                    echo "Installing go-junit-report..."
+                                    go install github.com/jstemmer/go-junit-report@latest
+                                fi
+                                
+                                echo "Running Go tests..."
+                                go test ./... -v 2>&1 | go-junit-report > test-results.xml
+                                echo "Test results written to test-results.xml"
+                                ls -la test-results.xml
+                            '''
                         }
                     }
                     post {

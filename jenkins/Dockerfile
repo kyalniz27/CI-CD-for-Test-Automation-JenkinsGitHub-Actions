@@ -33,12 +33,13 @@ RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
 ENV PATH="/usr/local/go/bin:${PATH}"
 ENV GOPATH="/var/jenkins_home/go"
 ENV GOCACHE="/var/jenkins_home/.gocache"
+ENV GOBIN="/var/jenkins_home/go/bin"
 
-# Install go-junit-report
-RUN go install github.com/jstemmer/go-junit-report@latest
+# Create Go directories and install go-junit-report
+RUN mkdir -p /var/jenkins_home/go/bin /var/jenkins_home/.gocache
+RUN GOPATH=/var/jenkins_home/go GOBIN=/var/jenkins_home/go/bin go install github.com/jstemmer/go-junit-report@latest
 
 # Ensure jenkins user owns the Go directories
-RUN mkdir -p /var/jenkins_home/go /var/jenkins_home/.gocache && \
-    chown -R jenkins:jenkins /var/jenkins_home/go /var/jenkins_home/.gocache
+RUN chown -R jenkins:jenkins /var/jenkins_home/go /var/jenkins_home/.gocache
 
 USER jenkins
