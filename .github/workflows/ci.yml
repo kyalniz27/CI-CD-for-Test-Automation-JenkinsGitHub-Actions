@@ -36,4 +36,12 @@ jobs:
         run: |
           npm ci
           npm test
+      - name: Publish Test Results
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: frontend-test-results
+          path: ./bugtracker-frontend/test-results.xml
+          reporter: jest-junit
+  
 
