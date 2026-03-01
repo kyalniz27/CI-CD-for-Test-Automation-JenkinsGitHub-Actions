@@ -18,7 +18,11 @@ jobs:
           go-version: 1.21
           cache-dependency-path: ./bugtracker-backend/go.sum
       - name: Install go-junit-report
-        run: | 
+        run: go install github.com/jstemmer/go-junit-report/v2@latest
+
+      - name: Execute Backend Unit Tests
+        working-directory: ./bugtracker-backend
+        run: |
           go test -json -coverprofile=coverage.out -covermode=atomic ./...
           go tool cover -func=coverage.out > coverage.txt
 
@@ -26,12 +30,7 @@ jobs:
           echo '```' >> $GITHUB_STEP_SUMMARY
           cat coverage.txt >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-
-          go install github.com/jstemmer/go-junit-report/v2@latest
-
-      - name: Execute Backend Unit Tests
-        working-directory: ./bugtracker-backend
-        run: go test -v ./... 2>&1 | go-junit-report > test-results.xml
+          go test -v ./... 2>&1 | go-junit-report > test-results.xml
 
       - name: Publish Test Results
         uses: dorny/test-reporter@v1
@@ -50,7 +49,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
-          cache: 'npm'
+          cache: "npm"
           cache-dependency-path: ./bugtracker-frontend/package-lock.json
       - name: Execute Frontend Unit Tests
         working-directory: ./bugtracker-frontend
@@ -64,5 +63,3 @@ jobs:
           name: frontend-test-results
           path: ./bugtracker-frontend/test-results.xml
           reporter: jest-junit
-  
-
