@@ -125,7 +125,7 @@ jobs:
 
       - name: Run API Tests
         working-directory: ./tests-api
-        env: 
+        env:
           CI: "1"
         run: |
           npm ci
@@ -147,14 +147,6 @@ jobs:
         with:
           name: api-test-results
           path: ./tests-api/test-results/
-          retention-days: 30
-
-      - name: Publish API Test Playwright Report
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: api-test-playwright-report
-          path: ./tests-api/playwright-report/
           retention-days: 30
 
       - name: Publish API Test Playwright Report
